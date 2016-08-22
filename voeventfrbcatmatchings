@@ -13,7 +13,7 @@ Other issues:
 - We will need table for authors to fill extra info form voevent xml
 - For frb is it enough to check name-utc for uniqueness
 - for observation is enough telescope-utc for uniqueness
-- for radio_obs_params which fields are good to check uniques??
+- for radio_obs_params which fields are good to check uniques?? it is the same as observation!
 - for radio_measured_params we check uniques with ivorn (THIS COL NEEDS TO BE ADDED, and we also add a col with a copy of the XML)
 - handling of correcctions/retractions: citations contain a attribute that is the cite (can be followup, supersedes or retraction). Depeding on the value we delete or update the DB.
 
@@ -24,12 +24,13 @@ frbs                         id                        INT UNSIGNED  -------
 frbs                         name                      VARCHAR       Why.Name or Why.Inference.Name (only if <Citations> is empty, i.e. it is a new FRB. If not, we ca check that Why.Name is the same as the first seeing)
 frbs                         utc                       TIMESTAMP     WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime (check UTC and units) (only if <Citations> is empty, i.e. it is a new FRB)
 frbs                         private                   TINYINT       What.Param (only if <Citations> is empty, i.e. it is a new FRB)
+NEW                          authorivorn               IVORN
 
 frbs_notes                   id                        INT UNSIGNED  -------
 frbs_notes                   frb_id                    INT UNSIGNED  -------
 frbs_notes                   last_modified             TIMESTAMP     Who.Date
-frbs_notes                   author                    VARCHAR       Who.AuthorIVORN
-frbs_notes                   note                      LONGTEXT      What.Param or Why.Concept or Why.Inference.Concept
+frbs_notes                   author                    VARCHAR       Who.AUthorIVORN
+frbs_notes                   note                      LONGTEXT      What.Param
 
 observations                 id                        INT UNSIGNED  -------
 observations                 frb_id                    INT UNSIGNED  -------
@@ -38,6 +39,7 @@ observations                 telescope                 TEXT          WhereWhen.O
 observations                 utc                       TIMESTAMP     WhereWhen.ObsDataLocation.ObservationLocation.AstroCoords.Time.TimeInstant.ISOTime (check UTC and units) (if there is already a "seeing" with the same UTC and telescope pair and related frb we check that rest of params also match)
 observations                 data_link                 TEXT          What.Param
 observations                 detected                  TINYINT       What.Param
+NEW                          authorivorn               IVORN
 
 observations_notes           id                        INT UNSIGNED  -------
 observations_notes           observation_id            INT UNSIGNED  -------
@@ -65,7 +67,7 @@ radio_obs_params             bits_per_sample           TINYINT       What.Group(
 radio_obs_params             gain                      FLOAT         What.Group(Obs_Params).Param
 radio_obs_params             tsys                      FLOAT         What.Group(Obs_Params).Param
 radio_obs_params             ne2001_dm_limit           FLOAT         What.Group(Obs_Params).Param
-NEW???                       config_id
+NEW                          authorivorn               IVORN
 
 radio_obs_params_notes       id                        INT UNSIGNED  -------
 radio_obs_params_notes       radio_obs_param_id        INT UNSIGNED  -------
@@ -103,6 +105,7 @@ radio_measured_params        z_phot_error              FLOAT         What.Group(
 radio_measured_params        z_spec                    FLOAT         What.Group(Meas_Params).Param
 radio_measured_params        z_spec_error              FLOAT         What.Group(Meas_Params).Param
 radio_measured_params        rank                      INT           What.Group(Meas_Params).Param
+NEW                          authorivorn               IVORN
 NEW                          ivorn                                   .attr[ivorn]
 NEW                          voeventxml                              Copy of the whole XML
 
@@ -111,12 +114,6 @@ radio_measured_params_notes  radio_measured_param_id   INT UNSIGNED  -------
 radio_measured_params_notes  last_modified             TIMESTAMP     Who.Date
 radio_measured_params_notes  author                    VARCHAR       Who.AuthorIVORN
 radio_measured_params_notes  note                      LONGTEXT      What.Param
-
-
-
-
-
-
 
 
 
