@@ -1,6 +1,6 @@
 # VOEvent compatibility in frbcatdb
 
-The next update to the DB is to make it compatible with VOEvent (![Example: VOEvent](2016_09_A_VOEvent_example.xml)
+The next update to the DB is to make it compatible with VOEvent (![Example: VOEvent](2016_09_A_VOEvent_example.xml) )
 
 The very first "seeing" of a FRB will be in a VOEvent XML without a <Citations>
 Other "seeings"" related to the same FRB will reference the previous VOEvent using <Citations>
