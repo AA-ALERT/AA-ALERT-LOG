@@ -1,0 +1,93 @@
+The MySQL DB is migrated to PostgreSQL so we can use SPOT to do analysis on the data
+
+We have adapted the create_db_tables.sql script to be valid for postgreSQL
+
+We have created an empty DB in PostgreSQL and loaded the tables
+
+./create_db.sh localhost oscarr oscarr frbcat
+
+and then we have done the migrate with the script below.
+
+The PNGs with the graphical representation of the DB are generated now with SchemaSpy.
+
+The Db has been migrated and the DB dump in this repo now contains a PostgreSQL dump
+
+Tests have been adapted to run and pass with postgresql
+
+
+
+
+
+
+
+
+
+--------------- MIGRATE MYSQL TO PSQL ---------------------------
+
+
+import pymysql
+import psycopg2
+
+def int2bool(value):
+    return value == 1
+
+connectionMySQL = pymysql.connect(host='localhost',port=None, user='oscarr',password='oscarr',db='frbcat',cursorclass=pymysql.cursors.DictCursor)
+connectionPSQL  = psycopg2.connect("dbname='frbcat' user='oscarr' host='localhost' password='oscarr'")
+
+cursorMySQL = connectionMySQL.cursor()
+cursorPSQL = connectionPSQL.cursor()
+
+tableColumnsDict = {
+'authors': 'id,ivorn,title,logo_url,short_name,contact_name,contact_email,contact_phone,other_information',
+'publications': 'id,type,reference,link,description',
+'frbs': 'id,author_id,name,utc,private' ,
+'frbs_have_publications': 'frb_id,pub_id',
+'frbs_notes': 'id,frb_id,last_modified,author,note',
+'observations': 'id,frb_id,author_id,type,telescope,utc,data_link,detected',
+'observations_have_publications': 'obs_id,pub_id',
+'observations_notes': 'id,obs_id,last_modified,author,note',
+'radio_observations_params': 'id,obs_id,author_id,settings_id,receiver,backend,beam,raj,decj,gl,gb,pointing_error,FWHM,sampling_time,bandwidth,centre_frequency,npol,channel_bandwidth,bits_per_sample,gain,tsys,ne2001_dm_limit',
+'radio_observations_params_have_publications': 'rop_id,pub_id',
+'radio_observations_params_notes': 'id,rop_id,last_modified,author,note',
+'radio_measured_params': 'id,rop_id,author_id,voevent_ivorn,voevent_xml,dm,dm_error,snr,width,width_error_upper,width_error_lower,flux,flux_prefix,flux_error_upper,flux_error_lower,flux_calibrated,dm_index,dm_index_error,scattering_index,scattering_index_error,scattering_time,scattering_time_error,linear_poln_frac,linear_poln_frac_error,circular_poln_frac,circular_poln_frac_error,spectral_index,spectral_index_error,z_phot,z_phot_error,z_spec,z_spec_error,rank',
+'radio_measured_params_have_publications': 'rmp_id,pub_id',
+'radio_measured_params_notes': 'id,rmp_id,last_modified,author,note',
+'radio_images': 'id,title,caption,image',
+'radio_images_have_radio_measured_params': 'radio_image_id,rmp_id'
+}
+
+tables = ['authors', 'publications', 'frbs', 'frbs_have_publications', 'frbs_notes', 'observations', 'observations_have_publications',
+'observations_notes', 'radio_observations_params', 'radio_observations_params_have_publications', 'radio_observations_params_notes',
+'radio_measured_params', 'radio_measured_params_have_publications', 'radio_measured_params_notes',
+'radio_images', 'radio_images_have_radio_measured_params']
+
+
+for table in tables:
+    cursorMySQL.execute('select ' + tableColumnsDict[table] + ' from ' + table)
+    rows = cursorMySQL.fetchall()
+    if table == 'frbs':
+        for row in rows:
+            row['private'] = int2bool(row['private'])
+    if table == 'observations':
+        for row in rows:
+            row['detected'] = int2bool(row['detected'])
+    if table == 'radio_measured_params':
+        for row in rows:
+            row['flux_calibrated'] = int2bool(row['flux_calibrated'])
+            if row['snr'] == None:
+                row['snr'] = -1
+            if row['width'] == None:
+                row['width'] = -1
+            if row['dm'] == None:
+                row['dm'] = -1
+    cursorPSQL.executemany('INSERT INTO ' + table + '(' + tableColumnsDict[table] + ') VALUES (' + ','.join(['%(' + t + ')s' for t in tableColumnsDict[table].split(',')]) + ')', rows)
+    connectionPSQL.commit()
+
+tables = ['authors', 'publications', 'frbs', 'frbs_notes', 'observations',
+    'observations_notes', 'radio_observations_params', 'radio_observations_params_notes',
+    'radio_measured_params', 'radio_measured_params_notes',
+    'radio_images']
+
+for table in tables:
+    cursorPSQL.execute("SELECT setval('" + table + "_id_seq', COALESCE((SELECT MAX(id)+1 FROM " + table + "), 1), false)")
+    connectionPSQL.commit()
