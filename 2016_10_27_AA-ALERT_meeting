@@ -1,0 +1,27 @@
+NLeSC Meeting 27 October
+Emily, Oscar, Ronald
+
+Oscar finishes 21 November, 2016
+Ronald is on holiday for most of December
+
+Ronald: scripts to translate xml to FRBCAT database
+keep RA and Dec both as hhmmss and float in degrees
+ - float is obviously easier to parse and query on
+**coordinate system in examples is sky_coord_system.utc_fk5_geo. Is this right? What coord system are we expecting people to use?
+**create a list of the units of all params. No units currently stored in the xml but it would be important to have these for the downloadable table
+**more descriptive names for the params of the xml (not for the database), put these in the same list as the units
+**unified content descriptors (ucds) for some of the parameters that might need it (see examples on VOEvent website)
+**need to know the IVORN of the ASTRON broker
+**need to know what the IVORNs of events out of ASTRON will look like
+
+In white paper: some setting_ID parameter for the radio_obs_params. Maybe an IVORN that points to a certain configuration of a telescope that was used before so we can just keep referring back to it each time. A way to check for uniqueness and not have to duplicate effort in checking every single parameter in radio_obs_params against each other
+
+Checks for uniqueness:
+frbs: name
+observation: telescope & utc & type
+rop: add setting_ID (string) to rop
+rmp: voevent_ivorn
+
+**when do we want to make the NLeSC version of the catalogue the "real" version? Host the database and website at ASTRON or continue to host the database at Swinburne. The NLeSC people NEED to have access to the code during the duration of the project. Where it's hosted isn't really important as long as they definitely have access.
+
+start the white paper on overleaf or authorea
